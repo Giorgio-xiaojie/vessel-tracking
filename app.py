@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, render_template
 import psutil
 import os
 import time
@@ -12,15 +12,15 @@ MAX_CPU_USAGE=80
 
 def signal_level(dbm):
     if dbm >= -50:
-        return 5
-    elif dbm >= -60:
         return 4
-    elif dbm >= -70:
+    elif dbm >= -60:
         return 3
-    elif dbm >= -80:
+    elif dbm >= -70:
         return 2
-    else:
+    elif dbm >= -80:
         return 1
+    else:
+        return 0
 
 def get_ais_status():
     # 检测你的AIS程序是否在运行
@@ -39,7 +39,7 @@ def home():
     quality = int(re.search(r'Link Quality=(\d+)', wifi).group(1))
     max_quality = int(re.search(r'Link Quality=\d+/(\d+)', wifi).group(1))
     signal_dbm = signal_level(int(re.search(r'Signal level=(-?\d+)', wifi).group(1)))
-    signal_dbm = signal_dbm * "█" + (5 - signal_dbm) * "[]"
+    img_name = "images/" + str(signal_dbm) + ".jpeg"
     quality_percent = (quality * 100 // max_quality)
     end = int(time.time())
     tm = int((end-start))
@@ -59,69 +59,19 @@ def home():
     cpu_color= "blue" if cpu_usage<MAX_CPU_USAGE else "red"
     wifi_color= "green" if quality_percent>60 else "orange"
    
-    return f"""
-    <div style="text-align:center;">
-        <h1 style="text-align:center; color:black; margin-top:90px">
-        Vessel-tracking
-        </h1>
-      
-        <h1 style="text-align:center;color:grey;">
-        ______________________________________________________________________________________________________________
-        </h1>
-    
-        <p style="text-align:center;color:grey;font-size:15px">
-        This is a Vessel-tracking ADS-B feeder. For more information visit <a href="https://www.bilibili.com" target="_blank">here</a>. Below you can view information to determine if your site is functioning properly.
-        </p>
-
-        <form>
-            <button title="1" style="padding:0px 100px;">1</button>
-            <button title="3" style="padding:0px 100px;">2</button>
-            <button title="5" style="padding:0px 100px;">3</button>
-            <button title="7" style="padding:0px 100px;">4</button>
-        </form>
-
-        
-        <p style="text-align:center;color:black;font-size:15px">
-        CPU Temperature:<span style="color:{temp_color}"> {temp}°C</span>
-        </p>
-
-        <p style="text-align:center;color:black;font-size:15px">
-        CPU Load:<span style="color:{cpu_color}"> {cpu_usage}%</span>       
-        </p>
-
-        <p style="text-align:center;color:black;font-size:15px">
-        System Uptime:  {d}days , {h}hours , {m}minutes
-        </p>
-    
-        <p style="text-align:center;color:black;font-size:15px">
-        WiFi:<span style="color:{wifi_color}"> {quality_percent}%</span>
-        </p>
-
-        <p style="text-align:center;color:black;font-size:15px">
-        Signal:<span style="color:black"> {signal_dbm} </span>
-        </p>
-
-        <p style="text-align:center;color:black;font-size:15px">
-        AIS:<span style="color:black"> {flag} </span>
-        </p>
-   
-        <a href="https://www.google.com" target="_blank" style="color:blue">go to google</a>
-
-        <form action="/page1">
-            <button type="submit";
-                    style="font-size:30px;
-                    padding:0px 10px;
-                    margin-top:50px;
-                    background-color:skyblue;
-                    color:white;
-                    border-radius:10px;
-                    ">
-            Go to vessel map
-            </button>
-        <form>
-    </div>
-    <meta http-equiv="refresh" content="5">
-    """
+    return render_template('index.html',
+                           temp=temp,
+                           wifi=wifi,
+                           quality_percent=quality_percent,
+                           m=m,
+                           h=h,
+                           d=d,
+                           cpu_usage=cpu_usage,
+                           temp_color=temp_color,
+                           cpu_color=cpu_color,
+                           wifi_color=wifi_color,
+                           flag=flag,
+                           img_name=img_name)
 
 @app.route("/page1")
 def page1():
@@ -157,4 +107,5 @@ if __name__=="__main__":
 #print(f"CPU 温度: {temp}°C")
 #print(f"内存使用: {memory.percent}% (剩余 {memory.available // 1024 // 1024}MB)")
 #print(f"磁盘使用: {disk.percent}%")
-#time = psutil.boot_time()
+#time = psutil.boot_time()    
+#signal_gs = (signal_dbm + 1) * "█" + (5 - signal_dbm - 1) * "[]"
