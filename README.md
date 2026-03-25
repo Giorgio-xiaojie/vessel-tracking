@@ -9,3 +9,26 @@ This app was developed to monitor the health of the Raspberry Pi Zero and monito
 
 
 The map page provides a way to verify that data is in fact flowing as expected by plotting vessel locations in real time.
+
+
+## Installation
+```markdown
+# Connect to your PI so that you can issue commands
+SSH to Pi if using another device on your netowrk (like a PC) or remote into Pi and use local terminal
+
+# Clone the repo (vessel-tracking directory will be created in the current directory the command is being ran from)
+git clone git clone https://github.com/Giorgio-xiaojie/vessel-tracking
+cd vessel-tracking
+
+# Create virtual environment
+python3 -m venv venv
+source venv/bin/activate
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Run it
+python app.py
+
+# Access the Web Dashboard
+In your browser http://<Your PI's IP>:8888
