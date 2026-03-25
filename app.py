@@ -39,7 +39,7 @@ def home():
     quality = int(re.search(r'Link Quality=(\d+)', wifi).group(1))
     max_quality = int(re.search(r'Link Quality=\d+/(\d+)', wifi).group(1))
     signal_dbm = signal_level(int(re.search(r'Signal level=(-?\d+)', wifi).group(1)))
-    img_name = "images/" + str(signal_dbm) + ".jpeg"
+    img_name = "images/wifi/" + str(signal_dbm) + ".jpeg"
     quality_percent = (quality * 100 // max_quality)
     end = int(time.time())
     tm = int((end-start))
@@ -53,11 +53,11 @@ def home():
         with open("/sys/class/thermal/thermal_zone0/temp", "r") as f:
             temp = int(f.read()) / 1000.0
     except:
-        temp = "无法获取"
+        temp = 9999  # artificially high value when temperature unavailable
     
-    temp_color= "blue" if temp<MAX_CPU_TEMP else "red"
-    cpu_color= "blue" if cpu_usage<MAX_CPU_USAGE else "red"
-    wifi_color= "green" if quality_percent>60 else "orange"
+    temp_color= "blue" if temp < MAX_CPU_TEMP else "red"
+    cpu_color= "blue" if cpu_usage < MAX_CPU_USAGE else "red"
+    wifi_color= "green" if quality_percent > 60 else "orange"
    
     return render_template('index.html',
                            temp=temp,
@@ -77,9 +77,9 @@ def home():
 def page1():
     return """
     <div style="text-align:center;">
-    <a href="https://www.bilibili.com" target="_blank">
+    <a href="https://aisstream.io/documentation" target="_blank">
         <button style="font-size:30px;padding:0px 0px;">
-        enter bilibili
+        AIS API Documentation
         </button>
     </a>
     </div>
