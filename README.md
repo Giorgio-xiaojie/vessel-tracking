@@ -26,10 +26,17 @@ source venv/bin/activate
 
 # Install dependencies
 pip install -r requirements.txt
-pip install gunicorn  (optional if running in production)
+pip install gunicorn  (optional if running in production or as a service)
 
-# Run it
+# Run it  (for dev purposes)
 python app.py
 
 # Access the Web Dashboard
 In your browser http://<Your PI's IP>:8888
+
+
+# Run it as a service  (Alternatively)
+Refer to documentation on systemd and services
+
+# Access the Web Dashboard
+In your browser http://<Your PI's IP>:5000
