@@ -26,6 +26,7 @@ source venv/bin/activate
 
 # Install dependencies
 pip install -r requirements.txt
+pip install gunicorn  (optional if running in production)
 
 # Run it
 python app.py
