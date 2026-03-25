@@ -23,7 +23,6 @@ def signal_level(dbm):
         return 0
 
 def get_ais_status():
-    # 检测你的AIS程序是否在运行
     for p in psutil.process_iter(['name']):
         if 'ais_script_name' in p.info['name']:
             return "Running"
@@ -53,7 +52,7 @@ def home():
         with open("/sys/class/thermal/thermal_zone0/temp", "r") as f:
             temp = int(f.read()) / 1000.0
     except:
-        temp = 9999  # artificially high value when temperature unavailable
+        temp = 9999  # artificially high value when temperature unavailable to prevent mixed type variables
     
     temp_color= "blue" if temp < MAX_CPU_TEMP else "red"
     cpu_color= "blue" if cpu_usage < MAX_CPU_USAGE else "red"
@@ -87,25 +86,3 @@ def page1():
     
 if __name__=="__main__":
     app.run(debug=True,host="0.0.0.0",port=8888)
-
-
-#       <p style="text-align:center;color:black;font-size:15px">
-#       PiAware Version:
-#       </p>
-#
-#       <p style="text-align:center;color:black;font-size:15px">
-#       Dump1090-fa Version:
-#       </p>
-#
-#       <p style="text-align:center;color:black;font-size:15px">
-#       Dump978-fa Version:
-#       </p>
-#memory = psutil.virtual_memory()
-#disk = psutil.disk_usage('/')
-#print(f"--- 树莓派状态 ---")
-#print(f"CPU 使用率: {cpu_usage}%")
-#print(f"CPU 温度: {temp}°C")
-#print(f"内存使用: {memory.percent}% (剩余 {memory.available // 1024 // 1024}MB)")
-#print(f"磁盘使用: {disk.percent}%")
-#time = psutil.boot_time()    
-#signal_gs = (signal_dbm + 1) * "█" + (5 - signal_dbm - 1) * "[]"
