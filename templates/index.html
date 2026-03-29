@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Vessel Tracking Ops Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='dashboard.css') }}">
+    <meta http-equiv="refresh" content="30">
+</head>
+<body>
+    <main class="dashboard-shell">
+        <section class="hero">
+            <div class="hero-top">
+                <div>
+                    <p class="eyebrow">Raspberry Pi monitoring</p>
+                    <h1>Vessel Tracking Ops Dashboard</h1>
+                    <p class="hero-subtitle">AIS API to Azure flow monitoring, with Pi health on the same screen.</p>
+                </div>
+                <span class="status-pill {{ stream_snapshot.overall_class }}">{{ stream_snapshot.overall_label }}</span>
+            </div>
+
+            <div class="hero-bottom">
+                <p class="hero-subtitle">AIS API -> Pi receiver -> local buffer -> Azure blob storage</p>
+                <p class="refresh-note">Last refresh {{ generated_at }}</p>
+            </div>
+        </section>
+
+        <section class="summary-grid">
+            {% for card in summary_cards %}
+            <article class="card summary-card">
+                <h2>{{ card.title }}</h2>
+                <div class="summary-value">{{ card.value }}</div>
+                <div class="summary-detail">{{ card.detail }}</div>
+                <div class="summary-status status-pill {{ card.class }}">{{ card.status }}</div>
+            </article>
+            {% endfor %}
+        </section>
+
+        <section class="stream-grid">
+            <article class="card stream-card">
+                <div class="stream-header">
+                    <div>
+                        <h2>{{ stream_snapshot.title }}</h2>
+                        <p class="panel-note">The card your uncle will look at first. It answers whether data is moving.</p>
+                    </div>
+                    <span class="status-pill {{ stream_snapshot.overall_class }}">{{ stream_snapshot.overall_label }}</span>
+                </div>
+
+                <div class="metric-grid">
+                    {% for metric in stream_snapshot.metrics %}
+                    <section class="metric-tile">
+                        <div class="metric-label">{{ metric.label }}</div>
+                        <div class="metric-value">{{ metric.value }}</div>
+                        <div class="metric-detail">{{ metric.detail }}</div>
+                    </section>
+                    {% endfor %}
+                </div>
+
+                <ul class="checks">
+                    {% for check in stream_snapshot.checks %}
+                    <li>
+                        <div class="check-label">
+                            <span class="check-dot {{ check.class }}"></span>
+                            <span>{{ check.label }}</span>
+                        </div>
+                        <strong>{{ check.value }}</strong>
+                    </li>
+                    {% endfor %}
+                </ul>
+
+                <div class="stream-footer">
+                    <span class="footer-note">{{ stream_snapshot.footer_left }}</span>
+                    <span class="footer-note">{{ stream_snapshot.footer_right }}</span>
+                </div>
+            </article>
+
+            <aside class="panel">
+                <h2>Pi status</h2>
+                <p class="panel-note">Live system values from the Raspberry Pi stay visible beside the flow card.</p>
+
+                <div class="mini-stats">
+                    <section class="mini-stat">
+                        <div class="mini-label">CPU temperature</div>
+                        <div class="mini-value">{{ pi_status.temp }} C</div>
+                    </section>
+                    <section class="mini-stat">
+                        <div class="mini-label">CPU load</div>
+                        <div class="mini-value">{{ pi_status.cpu_usage }}%</div>
+                    </section>
+                    <section class="mini-stat">
+                        <div class="mini-label">System uptime</div>
+                        <div class="mini-value">{{ pi_status.uptime }}</div>
+                    </section>
+                    <section class="mini-stat">
+                        <div class="mini-label">AIS service</div>
+                        <div class="mini-value">{{ pi_status.ais_status }}</div>
+                    </section>
+                </div>
+
+                <div class="signal-row">
+                    <img src="{{ url_for('static', filename=pi_status.img_name) }}" alt="Wi-Fi signal strength">
+                    <div>
+                        <strong>Wi-Fi
+                            {% if pi_status.wifi_percent is not none %}
+                                {{ pi_status.wifi_percent }}%
+                            {% else %}
+                                unavailable
+                            {% endif %}
+                        </strong>
+                        <div class="panel-note">
+                            {% if pi_status.signal_dbm is not none %}
+                                {{ pi_status.signal_dbm }} dBm
+                            {% else %}
+                                signal level unavailable
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </aside>
+        </section>
+
+        <section class="card pipeline">
+            <h2>Data pipeline</h2>
+            <p class="panel-note">Frontend-only visual for now. The layout is ready for real telemetry once you wire it up.</p>
+
+            <div class="pipeline-track">
+                <section class="pipeline-node">
+                    <h3>AIS API</h3>
+                    <p>Receiving vessel messages from the upstream feed.</p>
+                    <p>{{ stream_snapshot.flow_stats[0].value }} messages/min</p>
+                </section>
+                <section class="pipeline-node">
+                    <h3>Pi receiver</h3>
+                    <p>Local service process {{ pi_status.ais_status|lower }}.</p>
+                    <p>CPU {{ pi_status.cpu_usage }}% / temp {{ pi_status.temp }} C</p>
+                </section>
+                <section class="pipeline-node">
+                    <h3>Local buffer</h3>
+                    <p>{{ stream_snapshot.flow_stats[2].value }} batches pending.</p>
+                    <p>Queue remains small when flow is healthy.</p>
+                </section>
+                <section class="pipeline-node">
+                    <h3>Azure blob</h3>
+                    <p>{{ stream_snapshot.flow_stats[1].value }} uploads/min.</p>
+                    <p>Estimated lag {{ stream_snapshot.flow_stats[3].value }}.</p>
+                </section>
+            </div>
+
+            <div class="actions">
+                <a class="docs-link" href="https://aisstream.io/documentation" target="_blank" rel="noreferrer">AIS API documentation</a>
+                <a class="map-link" href="/page1">Go to vessel map</a>
+            </div>
+        </section>
+    </main>
+</body>
+</html>
+  
