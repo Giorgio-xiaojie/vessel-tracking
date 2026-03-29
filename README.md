@@ -36,5 +36,5 @@ python app.py
 Refer to documentation on systemd and services
 
 # Access the Web Dashboard
-In your browser http://<Your PI's IP>:5000
+In your browser http://<Your PI's IP>:8888
 
